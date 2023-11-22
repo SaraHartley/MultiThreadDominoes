@@ -8,6 +8,7 @@
 #define MAX_DOMINOES 28  // Maximum number of dominoes in the game
 #define HAND_SIZE 7      // Number of dominoes each player starts with
 #define NUM_PLAYERS 3    // Number of players in the game
+#define BOARD_SIZE_HORIZONTAL   //Width of the board
 
 // Define a struct for a domino, with left and right values
 typedef struct {
@@ -24,6 +25,7 @@ typedef struct {
 
 // Global variables
 Domino dominoes[MAX_DOMINOES];
+Domino board[MAX_DOMINOES];
 Domino drawPile[MAX_DOMINOES - NUM_PLAYERS * HAND_SIZE];
 int drawPileSize = 0;
 Player players[NUM_PLAYERS];
@@ -34,7 +36,9 @@ int game_over = 0;
 
 // Global variables representing the open ends of the domino chain
 int openEnd1 = -1;
+int openEnd1IValue = -2;
 int openEnd2 = -1;
+int openEnd2IValue = -2;
 int current_turn = 0;
 
 // Function declarations
@@ -48,6 +52,8 @@ int can_play_domino(Domino domino);
 void update_open_ends(Domino playedDomino);
 void *play_dominoes(void *arg);
 int determine_first_player();
+void initialize_board();
+void print_board();
 
 // Function to determine if a domino can be played based on the open ends
 int can_play_domino(Domino domino) {
@@ -87,14 +93,78 @@ void update_open_ends(Domino playedDomino) {
     if (openEnd1 == -1 && openEnd2 == -1) {
         openEnd1 = playedDomino.left;
         openEnd2 = playedDomino.right;
+        board[MAX_DOMINOES/2].left = playedDomino.left;
+        board[MAX_DOMINOES/2].right = playedDomino.right;
+        openEnd1IValue = (MAX_DOMINOES/2) - 1;
+        openEnd2IValue = (MAX_DOMINOES/2) + 1;
+
     } else {
         if (playedDomino.left == openEnd1 || playedDomino.right == openEnd1) {
             openEnd1 = (playedDomino.left == openEnd1) ? playedDomino.right : playedDomino.left;
+            
+            //if out of range
+            if (openEnd1IValue < 0){
+                
+                //create a new array of MAX_DOMINOES
+                Domino temp_board[MAX_DOMINOES];
+                //set 0th value to be playedDomino
+                temp_board[0].left = playedDomino.left;
+                temp_board[0].right = playedDomino.right;
+                //go through board and add them for length of new array
+                for (int i = 1; i < MAX_DOMINOES; ++i) {
+                    temp_board[i].left = board[i-1].left;
+                    temp_board[i].right = board[i-1].right;
+                }
+                //then replace board with new array
+                for (int i = 0; i < MAX_DOMINOES; ++i) {
+                    board[i].left = temp_board[i].left;
+                    board[i].right = temp_board[i].right;
+                }
+                openEnd1IValue--;
+
+
+            }
+            //else set i-1 of board to be playedDomino
+            else{
+                board[openEnd1IValue].left = playedDomino.left;
+                board[openEnd1IValue].right = playedDomino.right;
+                openEnd1IValue--;
+            }
+
         }
         if (playedDomino.left == openEnd2 || playedDomino.right == openEnd2) {
             openEnd2 = (playedDomino.left == openEnd2) ? playedDomino.right : playedDomino.left;
+            //if out of range
+            if (openEnd2IValue > MAX_DOMINOES-1){
+                
+                //create a new array of MAX_DOMINOES
+                Domino temp_board[MAX_DOMINOES];
+                //set 0th value to be playedDomino
+                temp_board[MAX_DOMINOES-1].left = playedDomino.left;
+                temp_board[MAX_DOMINOES-1].right = playedDomino.right;
+                //go through board and add them for length of new array
+                for (int i = 0; i < MAX_DOMINOES-1; ++i) {
+                    temp_board[i].left = board[i+1].left;
+                    temp_board[i].right = board[i+1].right;
+                }
+                //then replace board with new array
+                for (int i = 0; i < MAX_DOMINOES; ++i) {
+                    board[i].left = temp_board[i].left;
+                    board[i].right = temp_board[i].right;
+                }
+                openEnd2IValue--;
+
+            }
+            //else set i-1 of board to be playedDomino
+            else{
+                board[openEnd2IValue].left = playedDomino.left;
+                board[openEnd2IValue].right = playedDomino.right;
+                openEnd2IValue++;
+            }
+
         }
     }
+    
 }
 
 // Function to initialize all dominoes at the start of the game
@@ -177,6 +247,24 @@ int determine_first_player() {
     return startingPlayer;
 }
 
+// Initialize the game board with spaces
+void initialize_board() {
+    for (int i = 0; i < MAX_DOMINOES; ++i) {
+        Domino empty_domino;
+        empty_domino.left = -1;
+        empty_domino.right = -1;
+        board[i] = empty_domino;
+    } 
+        
+}
+
+void print_board(){
+    for (int i = 0; i < MAX_DOMINOES; ++i) {
+        printf("[%d|%d]\n", board[i].left, board[i].right);
+    }
+    printf("\n");
+    
+}
 
 // Function executed by each thread representing a player's turn
 void *play_dominoes(void *arg) {
@@ -245,11 +333,13 @@ void *play_dominoes(void *arg) {
             current_turn = (current_turn % NUM_PLAYERS) + 1;
             pthread_cond_broadcast(&cond);
         }
-        
+        print_board();
+
         pthread_mutex_unlock(&lock);
     }
 
     player->score = calculate_score(player);
+
     return NULL;
 }
 
@@ -266,6 +356,10 @@ int main() {
     deal_dominoes();
     initialize_drawPile();
     game_over = 0;  
+    
+    initialize_board();
+    print_board();
+    
 
     int firstPlayer = determine_first_player();  // Determine which player starts
     printf("Player %d starts the game.\n", firstPlayer + 1);
