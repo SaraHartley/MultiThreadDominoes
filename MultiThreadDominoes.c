@@ -66,7 +66,7 @@ int can_play_domino(Domino domino) {
     int return_value = 0;
     //if domino is a double...it can be placed horizontally
     if (domino.top == domino.bottom){
-        printf("[%d|%d] a double domino ", domino.top, domino.bottom);
+        //printf("[%d|%d] a double domino ", domino.top, domino.bottom);
         //**Two double dominoes cannot be placed horizontally next to each other
         //iterate through board
         for (int i = 0; i < BOARD_SIZE; ++i) {
@@ -76,13 +76,13 @@ int can_play_domino(Domino domino) {
                 if (response.i_value != -1 && response.j_value != -1){
                     //can place here
                     return_value = 1;
-                    printf("location: [%d,%d] return_value: [%d] \n",response.i_value, response.j_value, return_value);
+                    //printf("location: [%d,%d] return_value: [%d] \n",response.i_value, response.j_value, return_value);
                     return return_value;
                 }
             }
         }
     }else{
-        printf("[%d|%d] not a double domino ", domino.top, domino.bottom);
+        //printf("[%d|%d] not a double domino ", domino.top, domino.bottom);
         //else if domino is not a double...it can be placed vertically
         //iterate through board
             //iterate through board
@@ -93,13 +93,13 @@ int can_play_domino(Domino domino) {
                 if (response.i_value != -1 && response.j_value != -1){
                     //can place here
                     return_value = 1;
-                    printf("location: [%d,%d] return_value: [%d] \n",response.i_value, response.j_value, return_value);
+                    //printf("location: [%d,%d] return_value: [%d] \n",response.i_value, response.j_value, return_value);
                     return return_value;
                 }
             }
         }
     }
-    printf("return_value: [%d] \n",return_value);
+    //printf("return_value: [%d] \n",return_value);
     return return_value;
 }
 
@@ -109,17 +109,20 @@ Location can_place_vertically(Domino domino, int i, int j){
     return_location.j_value = -1;
     //check if either domino side matches either side of the current domino at board[i,j]
     //if domino.top or bottom = board[i,j].top or bottom
-    if(domino.top == board[i][j].top || domino.bottom == board[i][j].top || 
-           domino.top == board[i][j].bottom || domino.bottom == board[i][j].bottom){
-        //check if the domino can be placed above the found board domino
-        if(board[i-1][j].top == -1 && board[i-1][j].bottom == -1){
-            //can place here next to board[i,j]
+    
+    //check if the domino can be placed above the found board domino
+    if(board[i-1][j].top == -1 && board[i-1][j].bottom == -1){
+        //compare either side of domino to the top of the board domino
+        if(domino.top == board[i][j].top || domino.bottom == board[i][j].top){
+        //can place here next to board[i,j]
             return_location.i_value = i-1;
             return_location.j_value = j;
             return return_location;
         }
-        //else check if the domino can be placed below the found domino
-        else if(board[i+1][j].top == -1 && board[i+1][j].bottom == -1){
+    }
+    //else check if the domino can be placed below the found domino
+    else if(board[i+1][j].top == -1 && board[i+1][j].bottom == -1){
+        if(domino.top == board[i][j].bottom || domino.bottom == board[i][j].bottom){
             //can place here next to board[i,j]
             return_location.i_value = i+1;
             return_location.j_value = j;
@@ -195,30 +198,11 @@ void update_open_ends(Domino playedDomino) {
         openEnd2 = playedDomino.bottom;
         board[28][28] = playedDomino;
     } else {
-        //get board location for new Domino
-        //if domino is a double...it can be placed horizontally
-        //**Two double dominoes cannot be placed horizontally next to each other
-            //iterate through board
-                //call can_place_horizontally(domino, i, j)
-                    //can played
-                    //if response is [-1, -1]
-                        //console.log(an error that location was not actually availible)
-                    //else
-                        //set board[location] to passed in domino
-            
-        //else if domino is not a double...it can be placed vertically
-            //iterate through board
-                //call can_place_vertically(domino, i, j)
-                    //can played
-                    //if response is [-1, -1]
-                        //console.log(an error that location was not actually availible)
-                    //else
-                        //set board[location] to passed in domino
         
         int return_value = 0;
         //if domino is a double...it can be placed horizontally
         if (playedDomino.top == playedDomino.bottom){
-            printf("[%d|%d] a double domino \n", playedDomino.top, playedDomino.bottom);
+            //printf("[%d|%d] a double domino \n", playedDomino.top, playedDomino.bottom);
             //**Two double dominoes cannot be placed horizontally next to each other
             //iterate through board
             int found = 0;
@@ -240,7 +224,7 @@ void update_open_ends(Domino playedDomino) {
 
             
         }else{
-            printf("[%d|%d] not a double domino \n", playedDomino.top, playedDomino.bottom);
+            //printf("[%d|%d] not a double domino \n", playedDomino.top, playedDomino.bottom);
             //else if domino is not a double...it can be placed vertically
             //iterate through board
                 //iterate through board
@@ -251,8 +235,25 @@ void update_open_ends(Domino playedDomino) {
                     Location response = can_place_vertically(playedDomino, i, j);
                     if (response.i_value != -1 && response.j_value != -1){
                        //can place here
+                        //Flip the top and bottom of the domino being placed
+                        if (board[i][j].top == board[i][j].bottom){
+                            if((playedDomino.top == board[i][j].top && response.i_value < i) || (playedDomino.bottom == board[i][j].top && response.i_value > i)){
+                                int temp_val = playedDomino.top;
+                                playedDomino.top = playedDomino.bottom;
+                                playedDomino.bottom = temp_val;
+                            }
+                        }
+                        else{
+                            if(playedDomino.top == board[i][j].top || playedDomino.bottom == board[i][j].bottom){
+                                int temp_val = playedDomino.top;
+                                playedDomino.top = playedDomino.bottom;
+                                playedDomino.bottom = temp_val;
+                            }
+                        }
+                        //Place Domino
                         board[response.i_value][response.j_value] = playedDomino;
                         found = 1;
+
                     }
                     
                 }
@@ -361,6 +362,7 @@ void print_board(){
             //print if not empty
             if(board[i][j].top != -1 && board[i][j].bottom != -1){
                 printf("[%d,%d]:[%d|%d] ", i,j,board[i][j].top, board[i][j].bottom);
+                
             }
             /*//print if the top border and empty
             if(j == 0){
@@ -446,6 +448,12 @@ void *play_dominoes(void *arg) {
         } else if (played || !can_play(player)) {
             current_turn = (current_turn % NUM_PLAYERS) + 1;
             pthread_cond_broadcast(&cond);
+        }
+        printf("player %d score: %d \n",player_number,calculate_score(player));
+        printf("player hand: ");
+        for (int i = 0; i < player->hand_size; i++) {
+            printf("[%d|%d], ",player->hand[i].top, player->hand[i].bottom);
+            
         }
         print_board();
         pthread_mutex_unlock(&lock);
