@@ -95,19 +95,22 @@ int can_play_domino(Domino domino) {
 //}
 
 //[int, int] can_place_horizontally(domino, i, j){
-    //check if either domino side matches either side of the current domino at board[i,j]
-    //if domino.top or bottom = board[i,j].top or bottom
-        //check if the domino can be placed left of the found board domino
-            //can place here next to board[i,j]
-            //return [i,j-1]
-        //else check if the domino can be placed right of the found domino
-            //can place here next to board[i,j]
-            //return [i,j+1]
-        //else
-            //cannot place here next to board[i,j]
-            //return [-1,-1]
+    //if board[i,j] is a double too
+        //return [-1, -1] //Cannot play
     //else
-        //return [-1, -1] //Cannot play  
+        //check if either domino side matches either side of the current domino at board[i,j]
+        //if domino.top or bottom = board[i,j].top or bottom
+            //check if the domino can be placed left of the found board domino
+                //can place here next to board[i,j]
+                //return [i,j-1]
+            //else check if the domino can be placed right of the found domino
+                //can place here next to board[i,j]
+                //return [i,j+1]
+            //else
+                //cannot place here next to board[i,j]
+                //return [-1,-1]
+        //else
+            //return [-1, -1] //Cannot play
 //}
 
 
@@ -146,6 +149,27 @@ void update_open_ends(Domino playedDomino) {
         openEnd2 = playedDomino.bottom;
         board[28][28] = playedDomino;
     } else {
+        //get board location for new Domino
+        //if domino is a double...it can be placed horizontally
+        //**Two double dominoes cannot be placed horizontally next to each other
+            //iterate through board
+                //call can_place_horizontally(domino, i, j)
+                    //can played
+                    //if response is [-1, -1]
+                        //console.log(an error that location was not actually availible)
+                    //else
+                        //set board[location] to passed in domino
+            
+        //else if domino is not a double...it can be placed vertically
+            //iterate through board
+                //call can_place_vertically(domino, i, j)
+                    //can played
+                    //if response is [-1, -1]
+                        //console.log(an error that location was not actually availible)
+                    //else
+                        //set board[location] to passed in domino
+
+        
         if (playedDomino.top == openEnd1 || playedDomino.bottom == openEnd1) {
             openEnd1 = (playedDomino.top == openEnd1) ? playedDomino.bottom : playedDomino.top;
         }
