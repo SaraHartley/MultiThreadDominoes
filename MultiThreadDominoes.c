@@ -24,6 +24,11 @@ typedef struct {
     int score;
 } Player;
 
+typedef struct {
+    int i_value;
+    int j_value;
+} Location;
+
 // Global variables
 Domino dominoes[MAX_DOMINOES];
 Domino board[BOARD_SIZE][BOARD_SIZE];
@@ -53,65 +58,105 @@ void *play_dominoes(void *arg);
 int determine_first_player();
 void initialize_board();
 void print_board();
+Location can_place_vertically(Domino domino, int i, int j);
+Location can_place_horizontally(Domino domino, int i, int j);
 
 // Function to determine if a domino can be played based on the open ends
 int can_play_domino(Domino domino) {
+    int return_value = 0;
     //if domino is a double...it can be placed horizontally
-    //**Two double dominoes cannot be placed horizontally next to each other
+    if (domino.top == domino.bottom){
+        printf("[%d|%d] a double domino ", domino.top, domino.bottom);
+        //**Two double dominoes cannot be placed horizontally next to each other
         //iterate through board
-            //call can_place_horizontally(domino, i, j)
-                //can played
-                //if response is not[-1, -1]
-                    //return 1
-                //else Cannot play
-                    //return 0
-        
-    //else if domino is not a double...it can be placed vertically
+        for (int i = 0; i < BOARD_SIZE; ++i) {
+            for (int j = 0; j<BOARD_SIZE; ++j){
+                //call can_place_horizontally(domino, i, j)
+                Location response = can_place_horizontally(domino, i, j);
+                if (response.i_value != -1 && response.j_value != -1){
+                    //can place here
+                    return_value = 1;
+                    printf("location: [%d,%d] return_value: [%d] \n",response.i_value, response.j_value, return_value);
+                    return return_value;
+                }
+            }
+        }
+    }else{
+        printf("[%d|%d] not a double domino ", domino.top, domino.bottom);
+        //else if domino is not a double...it can be placed vertically
         //iterate through board
-            //call can_place_vertically(domino, i, j)
-                //can played
-                //if response is not[-1, -1]
-                    //return 1
-                //else Cannot play
-                    //return 0
-    return domino.top == openEnd1 || domino.bottom == openEnd1 || 
-           domino.top == openEnd2 || domino.bottom == openEnd2;
+            //iterate through board
+        for (int i = 0; i < BOARD_SIZE; ++i) {
+            for (int j = 0; j<BOARD_SIZE; ++j){
+                //call can_place_horizontally(domino, i, j)
+                Location response = can_place_vertically(domino, i, j);
+                if (response.i_value != -1 && response.j_value != -1){
+                    //can place here
+                    return_value = 1;
+                    printf("location: [%d,%d] return_value: [%d] \n",response.i_value, response.j_value, return_value);
+                    return return_value;
+                }
+            }
+        }
+    }
+    printf("return_value: [%d] \n",return_value);
+    return return_value;
 }
 
-//[int, int] can_place_vertically(domino, i, j){
+Location can_place_vertically(Domino domino, int i, int j){
+    Location return_location;
+    return_location.i_value = -1;
+    return_location.j_value = -1;
     //check if either domino side matches either side of the current domino at board[i,j]
     //if domino.top or bottom = board[i,j].top or bottom
+    if(domino.top == board[i][j].top || domino.bottom == board[i][j].top || 
+           domino.top == board[i][j].bottom || domino.bottom == board[i][j].bottom){
         //check if the domino can be placed above the found board domino
+        if(board[i-1][j].top == -1 && board[i-1][j].bottom == -1){
             //can place here next to board[i,j]
-            //return [i-1,j]
+            return_location.i_value = i-1;
+            return_location.j_value = j;
+            return return_location;
+        }
         //else check if the domino can be placed below the found domino
+        else if(board[i+1][j].top == -1 && board[i+1][j].bottom == -1){
             //can place here next to board[i,j]
-            //return [i+1,j]
-        //else
-            //cannot place here next to board[i,j]
-            //return [-1,-1]
-    //else
-        //return [-1, -1] //Cannot play  
-//}
+            return_location.i_value = i+1;
+            return_location.j_value = j;
+            return return_location;
+        }
+    }
+    return return_location;
+}
 
-//[int, int] can_place_horizontally(domino, i, j){
-    //if board[i,j] is a double too
-        //return [-1, -1] //Cannot play
-    //else
+Location can_place_horizontally(Domino domino, int i, int j){
+    Location return_location;
+    return_location.i_value = -1;
+    return_location.j_value = -1;
+    if (board[i][j].top != board[i][j].bottom){
         //check if either domino side matches either side of the current domino at board[i,j]
         //if domino.top or bottom = board[i,j].top or bottom
+        if(domino.top == board[i][j].top || domino.bottom == board[i][j].top || 
+           domino.top == board[i][j].bottom || domino.bottom == board[i][j].bottom){
             //check if the domino can be placed left of the found board domino
+            if(board[i][j-1].top == -1 && board[i][j-1].bottom == -1){
                 //can place here next to board[i,j]
-                //return [i,j-1]
+                return_location.i_value = i;
+                return_location.j_value = j-1;
+                return return_location;
+            }
             //else check if the domino can be placed right of the found domino
+            else if(board[i][j+1].top == -1 && board[i][j+1].bottom == -1){
                 //can place here next to board[i,j]
-                //return [i,j+1]
-            //else
-                //cannot place here next to board[i,j]
-                //return [-1,-1]
-        //else
-            //return [-1, -1] //Cannot play
-//}
+                return_location.i_value = i;
+                return_location.j_value = j+1;
+                return return_location;
+            }
+        }
+    }
+    
+    return return_location;
+}
 
 
 
