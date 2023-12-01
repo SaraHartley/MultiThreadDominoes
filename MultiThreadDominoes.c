@@ -138,18 +138,19 @@ Location can_place_horizontally(Domino domino, int i, int j){
         //if domino.top or bottom = board[i,j].top or bottom
         if(domino.top == board[i][j].top || domino.bottom == board[i][j].top || 
            domino.top == board[i][j].bottom || domino.bottom == board[i][j].bottom){
-            //check if the domino can be placed left of the found board domino
-            if(board[i][j-1].top == -1 && board[i][j-1].bottom == -1){
-                //can place here next to board[i,j]
-                return_location.i_value = i;
-                return_location.j_value = j-1;
-                return return_location;
-            }
-            //else check if the domino can be placed right of the found domino
-            else if(board[i][j+1].top == -1 && board[i][j+1].bottom == -1){
+            
+            //check if the domino can be placed right of the found domino
+            if(board[i][j+1].top == -1 && board[i][j+1].bottom == -1){
                 //can place here next to board[i,j]
                 return_location.i_value = i;
                 return_location.j_value = j+1;
+                return return_location;
+            }
+            //check if the domino can be placed left of the found board domino
+            else if(board[i][j-1].top == -1 && board[i][j-1].bottom == -1){
+                //can place here next to board[i,j]
+                return_location.i_value = i;
+                return_location.j_value = j-1;
                 return return_location;
             }
         }
@@ -359,7 +360,7 @@ void print_board(){
         for (int j = 14; j<BOARD_SIZE-14; ++j){
             //print if not empty
             if(board[i][j].top != -1 && board[i][j].bottom != -1){
-                printf("[%d|%d]", board[i][j].top, board[i][j].bottom);
+                printf("[%d,%d]:[%d|%d] ", i,j,board[i][j].top, board[i][j].bottom);
             }
             /*//print if the top border and empty
             if(j == 0){
