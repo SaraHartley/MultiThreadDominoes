@@ -398,7 +398,8 @@ void *play_dominoes(void *arg) {
         }
         int played = 0;
         Domino drawn;
-
+        
+        printf("hand_size before: %d\n", player->hand_size);
         // Check if player has no dominos top, which indicates game over
         if (player->hand_size == 0) { 
             game_over = 1;
@@ -450,6 +451,7 @@ void *play_dominoes(void *arg) {
             pthread_cond_broadcast(&cond);
         }
         printf("player %d score: %d \n",player_number,calculate_score(player));
+        printf("hand_size after: %d\n", player->hand_size);
         printf("player hand: ");
         for (int i = 0; i < player->hand_size; i++) {
             printf("[%d|%d], ",player->hand[i].top, player->hand[i].bottom);
